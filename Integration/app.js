@@ -11,6 +11,9 @@ app.use(bodyParser.json());
 
 function decodeCayennePayload(payload_hex){
   var start = 0;
+  var datajson = '{"Temperature":""}';
+  var data = JSON.parse(datajson);
+  data.Timestamp = getTimestamp();
   var end = payload_hex.length;
 
   do
@@ -68,6 +71,7 @@ function decodeCayennePayload(payload_hex){
       console.log('Presence Sensor hex : '+value);
       var dec  = hexToInt(value);
       console.log('Presence Sensor dec : '+dec);
+      
 
       start = 6;
     }else if(dataType=="67"){
@@ -76,6 +80,7 @@ function decodeCayennePayload(payload_hex){
       var value = payload_hex.substring(4,8);
       console.log('Temperature Sensor hex : '+value);
       var dec  = hexToInt(value)*0.1;
+      data.Temperature = dec;
       console.log('Temperature Sensor dec : '+dec);
 
       start = 8;
@@ -86,6 +91,7 @@ function decodeCayennePayload(payload_hex){
       console.log('Humidity Sensor hex: '+value);
       var dec  = hexToInt(value)*0.5;
       console.log('Humidity Sensor dec: '+dec);
+      data.Humidity = dec;
 
       start = 6;
     }else if(dataType=="71"){
@@ -175,6 +181,8 @@ function decodeCayennePayload(payload_hex){
 
   }while(end>1);
   console.log('_____');
+  
+  return data;
 }
 
 function hexToInt(hex) {
@@ -259,10 +267,14 @@ app.delete('/deleteData/:id', function (req, res) {
 
 
 
-  app.post('/SensorData', function (req, res) {
-    var json = req.body;
-    //json.Timestamp = Date.now();
-    db.SensorData.insert(json, function (err, docs) {
+  app.get('/SensorData', function (req, res) {
+    // var json = req.body;
+    // var payload = json.DevEUI_uplink.payload_hex;
+    let payload = "0073277a0167011602687b0371011601160116048601160116011605028324";
+    
+    var data= decodeCayennePayload(payload)
+    // .Timestamp = getTimestamp()
+    db.SensorData.insert(data, function (err, docs) {
       console.log(docs);
       res.send(docs);
     });
@@ -285,7 +297,6 @@ app.delete('/deleteData/:id', function (req, res) {
   })
 
   app.get('/showBeaconData', function (req, res) {
-    db.market.find({}).sort({_id:-1}).limit(1)
     db.BeaconData.find(function (err, docs) {
       db.BeaconData.count({},(err, data) => {
         console.log(docs[data-1]);
@@ -294,8 +305,17 @@ app.delete('/deleteData/:id', function (req, res) {
       
     });
   })
+  function savesenser(decodeCayennePayload) {
+    
+    db.SensorData.insert(decodeCayennePayload, function (err, docs) {
+      console.log(docs);
+      res.send(docs);
+    });
+    
 
-
+    
+  }
+  
 
 var server = app.listen(8080, function () {
 var port = server.address().port
