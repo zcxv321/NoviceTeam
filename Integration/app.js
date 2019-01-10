@@ -30,8 +30,8 @@ app.use(bodyParser.json());
 
 function decodeCayennePayload(payload_hex){
   var start = 0;
-  var datajson = {};
-  var data = JSON.parse(datajson);
+  var data = {};
+  //var data = JSON.parse(datajson);
   data.Timestamp = getTimestamp();
   var end = payload_hex.length;
 
