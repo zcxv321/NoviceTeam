@@ -19,8 +19,8 @@ app.get('/showData', function (req, res) {
     console.log(docs);
     res.send(docs);
   });
-
 })
+
 app.post('/getdataformurl',function(req,res){
   console.log(req.body)
   res.send(req.body)
@@ -73,9 +73,23 @@ app.delete('/deleteData/:id', function (req, res) {
     });
   })
 
+  app.get('/showSensorData', function (req, res) {
+    db.SensorData.find(function (err, docs) {
+      console.log(docs);
+      res.send(docs);
+    });
+  })
+
   app.post('/BeaconData', function (req, res) {
     var json = req.body;
     db.BeaconData.insert(json, function (err, docs) {
+      console.log(docs);
+      res.send(docs);
+    });
+  })
+
+  app.get('/showBeaconData', function (req, res) {
+    db.BeaconData.find(function (err, docs) {
       console.log(docs);
       res.send(docs);
     });
