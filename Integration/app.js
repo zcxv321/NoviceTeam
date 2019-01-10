@@ -89,9 +89,13 @@ app.delete('/deleteData/:id', function (req, res) {
   })
 
   app.get('/showBeaconData', function (req, res) {
+
     db.BeaconData.find(function (err, docs) {
-      console.log(docs);
-      res.send(docs);
+      db.BeaconData.count({},(err, data) => {
+        console.log(docs[data-1]);
+      res.end( JSON.stringify(docs[data-1]));
+})
+      
     });
   })
 
