@@ -1,6 +1,25 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongojs = require('./db');
+var p_in = 0;
+var p_out = 0;
+var moment = require('moment-timezone');
+var fromDatetime = new Date("2014/1/30 11:11:00"); 
+fromDatetime=fromDatetime.toDateString()
+var datatable = {};
+datatable.date=getTimestamp();
+datatable.data=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+var d = new Date(2018, 11, 24, 10+7, 33, 30);
+var dd = new Date(2018, 11, 24, 10+8, 33, 30);
+var toDatetime = new Date("10/21/2014 07:59:59");
+//console.log(d>dd);
+var formatHour = 'HH';
+var formatYMD = 'YYYY-MM-DD';
+var datee = new Date()
+var newTimeHour_old = moment(datee, formatHour).tz("Asia/Bangkok").format(formatHour);
+var newTimeYMD_old = moment(datee, formatYMD).tz("Asia/Bangkok").format(formatYMD);
+
+
 //temp
 //team id
 //รับข้อมูลลง database
@@ -11,7 +30,7 @@ app.use(bodyParser.json());
 
 function decodeCayennePayload(payload_hex){
   var start = 0;
-  var datajson = '{"Temperature":""}';
+  var datajson = {};
   var data = JSON.parse(datajson);
   data.Timestamp = getTimestamp();
   var end = payload_hex.length;
@@ -196,19 +215,18 @@ function hexToInt(hex) {
   }
   return num;
 }
+//getTimestamp()
 
 function getTimestamp(req, res)
 {
-  var cdate = new Date();
-  var day = cdate.getDate();
-  var month = cdate.getMonth()+1;
-  var year = cdate.getFullYear();
-  var hour = cdate.getHours();
-  var min = cdate.getMinutes();
-  
-  var data =year+"-"+month+"-"+day+" "+hour+":"+min
-  //console.log(data)
-  return data
+      var datee = new Date();
+      var formatf = 'YYYY-MM-DD HH:mm:ss'
+      var newTime = moment(datee, formatf).tz("Asia/Bangkok").format(formatf);
+      // var useTime = newTime.replace('/', "-")
+     // console.log(newTime)
+      // console.log(useTime)
+     // console.log(fromDatetime)
+  return newTime
 }
 
 
@@ -289,12 +307,110 @@ app.delete('/deleteData/:id', function (req, res) {
 
   app.post('/BeaconData', function (req, res) {
     var json = req.body;
-    json.Timestamp = getTimestamp()
-    db.BeaconData.insert(json, function (err, docs) {
-      console.log(docs);
-      res.send(docs);
+    console.log(json)
+    if(json.People == 'enter'){
+      p_in ++;
+    }
+    if(json.People == "leave"){
+      p_out ++;
+    }
+
+    //console.log(p_in);
+    //console.log(p_out)
+    var data ={};
+    data.Timestamp = getTimestamp()
+    data.p_in = p_in
+    data.p_out = p_out
+    
+   var currenttime = getTimestamp()
+   currenttime = currenttime.substring(0,10)
+
+   var dataTime = json.timestamp
+   dataTime = dataTime.substring(0,10)
+   var datahour = json.timestamp
+   datahour = datahour.substring(11,13)
+   
+console.log(newTimeYMD_old,dataTime);
+    console.log("DATE",newTimeYMD_old<dataTime)
+    if(newTimeYMD_old < dataTime){
+
+      newTimeYMD_old = dataTime
+      newTimeHour_old = "00";
+      datatable={}
+      datatable.data=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      console.log("New DATE",newTimeYMD_old);
+      datatable.date = newTimeYMD_old
+      //insert database
+      db.dataTableBeacon.insert(datatable, function (err, docs) {
+        console.log(docs);
+        res.send(docs);
     });
+     // datatable.date = getTimestamp();
+      //สร้างตารางใหม่
+    }else{console.log(newTimeHour_old,datahour)
+      console.log("TIME",newTimeHour_old<datahour)
+      if(newTimeHour_old < datahour){
+        newTimeHour_old = datahour
+        
+        console.log("New Time",newTimeHour_old)
+        //datatable.date = getTimestamp();
+        if(newTimeHour_old[0] == "0"){
+          timehours = newTimeHour_old[1]
+        }else{
+          timehours = newTimeHour_old
+        }
+        timehourss = parseInt(newTimeHour_old, 10);
+        datatable.data[timehourss] = p_in
+        console.log(datatable)
+        //update datasbase
+        db.dataTableBeacon.update({date:newTimeYMD_old}, {$set:{data:datatable.data}}, function(err, result) {
+          if(result != null){
+           console.log('Update Done', result);
+     res.json(result);
+       }
+       else{
+         console.log("un");
+       }
+        
+ });
+        //ใส่ของเข้าไปในช่องที่ n
+      }
+    
+      
+    }
+    //console.log(datatable)
+   // res.send(datatable)
+    // db.BeaconData.insert(data, function (err, docs) {
+    //   console.log(docs);
+       //res.send(docs);
+    // });
   })
+
+
+  app.get('/getdatatable/:id',function(req,res){
+    db.dataTableBeacon.find(function (err, docs) {
+      var dataarrays=[];
+      for( i in docs){
+        dataarrays = dataarrays.concat(docs[i].data);
+        
+        // console.log("doci",docs[i].data)
+        // console.log("asd")
+      }
+     // console.log("dataarrays",dataarrays[1])
+      //console.log(docs);
+      var enddata=""
+      for(var i = dataarrays.length;i>dataarrays.length-req.params.id;i-- ){
+        console.log(dataarrays[i-1]);
+       // console.log(i)
+      
+         enddata+=(dataarrays[i-1]+",")
+       }
+       
+      
+    
+      res.send(enddata);
+    });
+  });
 
   app.get('/showBeaconData', function (req, res) {
     db.BeaconData.find(function (err, docs) {
