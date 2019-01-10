@@ -191,6 +191,7 @@ function decodeCayennePayload(payload_hex){
 
     }else {
       console.log('Error');
+      break;
     }
 
 
