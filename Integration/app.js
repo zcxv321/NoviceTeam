@@ -9,6 +9,21 @@ var db = mongojs.connect;
 var app = express();
 app.use(bodyParser.json());
 
+function getTimestamp(req, res)
+{
+  var cdate = new Date();
+  var day = cdate.getDate();
+  var month = cdate.getMonth()+1;
+  var year = cdate.getFullYear();
+  var hour = cdate.getHours();
+  var min = cdate.getMinutes();
+  
+  var data =year+"-"+month+"-"+day+" "+hour+":"+min
+  //console.log(data)
+  return data
+}
+
+
 app.get('/', function (req, res) {
   res.send("Sample Code for RESTful API");
 })
@@ -82,6 +97,7 @@ app.delete('/deleteData/:id', function (req, res) {
 
   app.post('/BeaconData', function (req, res) {
     var json = req.body;
+    json.Timestamp = getTimestamp()
     db.BeaconData.insert(json, function (err, docs) {
       console.log(docs);
       res.send(docs);
@@ -89,6 +105,9 @@ app.delete('/deleteData/:id', function (req, res) {
   })
 
   app.get('/showBeaconData', function (req, res) {
+
+    db.market.find({}).sort({_id:-1}).limit(1)
+
 
     db.BeaconData.find(function (err, docs) {
       db.BeaconData.count({},(err, data) => {
