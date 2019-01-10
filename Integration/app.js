@@ -289,7 +289,7 @@ app.delete('/deleteData/:id', function (req, res) {
      var json = req.body;
      
      var payload = json.DevEUI_uplink.payload_hex;
-     console.log(payload)
+     console.log(json)
     //let payload = "0073277a0167011602687b0371011601160116048601160116011605028324";
     
     var data= decodeCayennePayload(payload)
