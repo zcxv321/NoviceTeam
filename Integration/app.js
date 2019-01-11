@@ -18,7 +18,7 @@ var formatYMD = 'YYYY-MM-DD';
 var datee = new Date()
 var newTimeHour_old = moment(datee, formatHour).tz("Asia/Bangkok").format(formatHour);
 var newTimeYMD_old = moment(datee, formatYMD).tz("Asia/Bangkok").format(formatYMD);
-
+var payload ="";
 
 //temp
 //team id
@@ -289,7 +289,7 @@ app.delete('/deleteData/:id', function (req, res) {
   app.post('/SensorData', function (req, res) {
      var json = req.body;
      
-     var payload = json.DevEUI_uplink.payload_hex;
+      payload = json.DevEUI_uplink.payload_hex;
      console.log(payload)
     //let payload = "0073277a0167011602687b0371011601160116048601160116011605028324";
     
@@ -425,6 +425,10 @@ console.log(newTimeYMD_old,dataTime);
 })
       
     });
+  })
+
+  app.get('/getAdminMon', function (req, res) {   
+    res.send(decodeCayennePayload(payload))
   })
   function savesenser(decodeCayennePayload) {
     
