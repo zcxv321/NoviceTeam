@@ -346,7 +346,7 @@ console.log(newTimeYMD_old,dataTime);
       //insert database
       db.dataTableBeacon.insert(datatable, function (err, docs) {
         console.log(docs);
-        res.send(docs);
+        
     });
      // datatable.date = getTimestamp();
       //สร้างตารางใหม่
@@ -363,7 +363,7 @@ console.log(newTimeYMD_old,dataTime);
           timehours = newTimeHour_old
         }
         timehourss = parseInt(newTimeHour_old, 10);
-        datatable.data[timehourss] = p_in
+        datatable.data[timehourss-1] = p_in
         console.log(datatable)
         //update datasbase
         db.dataTableBeacon.update({date:newTimeYMD_old}, {$set:{data:datatable.data}}, function(err, result) {
@@ -376,6 +376,7 @@ console.log(newTimeYMD_old,dataTime);
        }
         
  });
+ res.send("Ok");
  p_in = 0;
  p_out = 0;
         //ใส่ของเข้าไปในช่องที่ n
@@ -428,12 +429,22 @@ console.log(newTimeYMD_old,dataTime);
   })
 
   app.get('/getAdminMon', function (req, res) {   
+    var z = {}
+    z.datasensor = decodeCayennePayload(payload)
+    z.p_in = p_in
+    z.p_out = p_out
     res.send(decodeCayennePayload(payload))
+
+    console.log(decodeCayennePayload(payload))
   })
+
+
   function savesenser(decodeCayennePayload) {
     
     db.SensorData.insert(decodeCayennePayload, function (err, docs) {
+      
       console.log(docs);
+
       res.send(docs);
     });
     
