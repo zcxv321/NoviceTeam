@@ -106,7 +106,7 @@ function decodeCayennePayload(payload_hex){
     }else if(dataType=="68"){
       //Humidity Sensor
       //1 byte 0.5 % Unsigned
-      var value = payload_hex.substring(4,6);
+      var value = payload_hex.substring(4,8);
      // console.log('Humidity Sensor hex: '+value);
       var dec  = hexToInt(value)*0.5;
       //console.log('Humidity Sensor dec: '+dec);
@@ -376,6 +376,8 @@ console.log(newTimeYMD_old,dataTime);
        }
         
  });
+ p_in = 0;
+ p_out = 0;
         //ใส่ของเข้าไปในช่องที่ n
       }
     
